@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+
+    <title>Hello, world!</title>
+  </head>
+  <body onload="users_read()">
+    <div class="container">
+      <div class="row">
+        <h1>Users</h1>
+      </div>
+        <button type="button" class="btn btn-primary" onclick="window.open('index2.html')">Create Users</button>
+      <div class="row">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">id</th>
+              <th scope="col">avatar</th>
+              <th scope="col">fname</th>
+              <th scope="col">lname</th>
+              <th scope="col">Manage</th>
+            </tr>
+          </thead>
+          <tbody id="user_table">
+           
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
+<script>
+  var users_read = function () {
+    const requestOptions = {
+      method: "GET",
+      redirect: "follow"
+    };
+    var user_table = document.getElementById("user_table");
+  user_table.innerHTML = "Loading...";
+
+  fetch("http://localhost/crud/api/user/read.php", requestOptions)
+    .then((response) => response.text())
+    .then((result) => {
+      console.log(result);
+
+      user_table.innerHTML = "";
+
+      let jsonObj;
+      try {
+        jsonObj = JSON.parse(result);
+      } catch (e) {
+        user_table.innerHTML = "<tr><td colspan='5'>Error: API ไม่ได้ส่ง JSON กลับมา</td></tr>";
+        console.error("Not JSON:", result);
+        return;
+      }
+
+       if (jsonObj.data) jsonObj = jsonObj.data;
+
+      for (let user of jsonObj) {
+        var row = `
+        <tr>
+        <th scope="row">`+user.id+`</th>
+        <td><img src="`+user.avatar+`"width="50px" alt="`+user.fname+`"></td>
+        <td>`+user.fname+`</td> 
+        <td>`+user.lname+`</td>
+        <td> <a href="index3.html?id= `+user.id+`">Edit</a> <a href="#" onclick="user_delete(`+user.id+`)">delete</a> </td>
+        </tr>
+        `;
+        user_table.insertAdjacentHTML('beforeend', row);
+      }
+    })
+    .catch((error) => console.error(error));
+  };
+
+  
+    var user_delete = function(id){
+        const myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+
+const raw = JSON.stringify({
+  "id": id
+}); 
+
+const requestOptions = {
+  method: "DELETE",
+  headers: myHeaders,
+  body: raw,
+  redirect: "follow"
+};
+
+fetch("http://localhost/crud/api/user/delete.php", requestOptions)
+  .then((response) => response.text())
+  .then((result) => {
+    console.log(result);
+
+    let jsonObj;
+
+    try {
+      jsonObj = JSON.parse(result);
+    } catch (e) {
+      return;
+    }
+     if(jsonObj.status == 'ok'){
+        alert('ok');
+        window.open('index.html');
+    }
+    else{ 
+        alert('Error');
+    }
+  })
+  .catch((error) => console.error(error))
+    }
+</script>
