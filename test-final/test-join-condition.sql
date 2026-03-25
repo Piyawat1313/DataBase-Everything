@@ -57,3 +57,12 @@ order by count(course.course_id) desc;
 
 
 
+-- แสดงรายชื่อนักศึกษาที่ยัง ไม่ได้ลงทะเบียนเรียนวิชา 'Database Systems' เลยสักครั้ง
+select student.first_name
+from student
+where student_id not in (
+					select enrollment.student_id
+                    from enrollment
+                    join course on enrollment.course_id = course.course_id
+                    where course.course_name = 'Database Systems');
+
